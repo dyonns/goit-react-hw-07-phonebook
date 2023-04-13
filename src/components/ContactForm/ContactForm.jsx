@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styles from './ContactForm.module.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { add as addContact } from 'redux/Contacts/contactsSlice';
+import { addSuccess as addContact } from 'redux/Contacts/contactsSlice';
 import { nanoid } from 'nanoid';
 
 const initialState = {
@@ -11,6 +11,7 @@ const initialState = {
 
 const ContactForm = () => {
   const dispatch = useDispatch();
+  const isLoading = useSelector(state => state.contacts.isLoading);
   const [form, setForm] = useState(initialState);
   const contacts = useSelector(state => state.contacts.items);
 
@@ -34,11 +35,8 @@ const ContactForm = () => {
     }
 
     const newContact = { name, number, id: nanoid() };
-
     dispatch(addContact(newContact));
     resetForm();
-
-    console.log('value', form.name);
   };
 
   const resetForm = () => {
@@ -78,7 +76,7 @@ const ContactForm = () => {
         />
         <br />
         <button type="submit" className={styles.btnContForm}>
-          Add contact
+          {isLoading ? 'Loadding' : 'Add contact'}
         </button>
       </form>
     </>
