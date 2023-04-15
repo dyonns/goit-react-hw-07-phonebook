@@ -1,39 +1,50 @@
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-  addContactApi,
-  getContactApi,
-  removeContactApi,
-} from 'components/servises/contactsApi';
-import {
-  addError,
-  addRequest,
-  addSuccess,
-  getContactError,
-  getContactRequest,
-  getContactSuccess,
-  removeContactError,
-  removeContactRequest,
-  removeContactSuccess,
-} from './contactsSlice';
+  addContactsApi,
+  getContactsApi,
+  removeContactsApi,
+} from 'services/contactsApi';
 
-export const addContact = newContact => (dispatch, getState) => {
-  dispatch(addRequest());
+export const addContacts = createAsyncThunk(
+  'contacts/add',
+  async (newContact, thunkApi) => {
+    try {
+      const contact = await addContactsApi(newContact);
+      return contact;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
 
-  addContactApi(newContact)
-    .then(contact => dispatch(addSuccess(contact)))
-    .catch(err => dispatch(addError(err.message)));
-};
+export const deleteContacts = createAsyncThunk(
+  'contacts/delete',
+  async (id, thunkApi) => {
+    try {
+      await removeContactsApi(id);
+      return id;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
 
-export const getContact = () => dispatch => {
-  dispatch(getContactRequest());
-  getContactApi()
-    .then(data => dispatch(getContactSuccess(data)))
-    .catch(err => dispatch(getContactError(err.message)));
-};
+export const getContacts = createAsyncThunk(
+  'contacts/get',
+  async (_, thunkApi) => {
+    try {
+      const data = await getContactsApi();
+      return data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  },
+  {
+    condition: (_, { getState }) => {
+      const { contacts } = getState().items;
 
-export const removeContact = id => dispatch => {
-  dispatch(removeContactRequest());
-
-  removeContactApi(id)
-    .then(id => dispatch(removeContactSuccess(id)))
-    .catch(err => dispatch(removeContactError(err.meassage)));
-};
+      if (!contacts.length) return true;
+      return false;
+    },
+  }
+);

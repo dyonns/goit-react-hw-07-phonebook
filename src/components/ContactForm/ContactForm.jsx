@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import styles from './ContactForm.module.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { addSuccess as addContact } from 'redux/Contacts/contactsSlice';
-import { nanoid } from 'nanoid';
+import { addContacts } from 'redux/Contacts/contactsOperayion';
+import { v4 as uuidv4 } from 'uuid';
+import { selectContacts, selectLoading } from 'redux/Contacts/selectors';
 
 const initialState = {
   name: '',
   number: '',
+  id: uuidv4(),
 };
 
 const ContactForm = () => {
   const dispatch = useDispatch();
-  const isLoading = useSelector(state => state.contacts.isLoading);
   const [form, setForm] = useState(initialState);
-  const contacts = useSelector(state => state.contacts.items);
+  const contacts = useSelector(selectContacts);
+
+  const isLoading = useSelector(selectLoading);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -24,7 +27,8 @@ const ContactForm = () => {
 
   const hendleSubmit = e => {
     e.preventDefault();
-    const { name, number } = form;
+
+    const { name } = form;
 
     const isContactExist = contacts.some(
       el => el.name.toLowerCase() === name.toLowerCase()
@@ -34,13 +38,9 @@ const ContactForm = () => {
       return;
     }
 
-    const newContact = { name, number, id: nanoid() };
-    dispatch(addContact(newContact));
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setForm(() => ({ name: '', number: '' }));
+    const newContact = { ...form };
+    dispatch(addContacts(newContact));
+    setForm(initialState);
   };
 
   return (

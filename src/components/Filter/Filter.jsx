@@ -1,10 +1,8 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import s from './Filter.module.css';
 import { changeFilter } from 'redux/Contacts/contactsSlice';
 
 const Filter = () => {
-  const filter = useSelector(state => state.contacts.filter);
-
   const dispatch = useDispatch();
 
   return (
@@ -12,9 +10,8 @@ const Filter = () => {
       <label className={s.filter}>
         <p>Filter</p>
         <input
-          type="name"
-          value={filter}
-          onChange={e => dispatch(changeFilter(e))}
+          type="text"
+          onChange={e => dispatch(changeFilter(e.target.value))}
           className={s.filterInput}
         />
       </label>

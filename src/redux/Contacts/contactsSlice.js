@@ -1,80 +1,54 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { addContacts, deleteContacts, getContacts } from './contactsOperayion';
+
+const initState = {
+  contacts: [],
+  filter: '',
+  isLoading: false,
+};
 
 const contactsSlice = createSlice({
-  name: 'contacts',
-  initialState: {
-    items: [],
-    filter: '',
-    isLoading: false,
-    error: null,
-  },
+  name: 'items',
+  initialState: initState,
   reducers: {
-    getContactRequest(state) {
-      state.isLoading = true;
-    },
-    getContactSuccess(state, { payload }) {
-      state.isLoading = false;
-      state.items = payload;
-    },
-    getContactError(state, { payload }) {
-      state.isLoading = false;
-      state.error = payload;
-    },
-    addRequest(state) {
-      return { ...state, isLoading: true };
-    },
-    addSuccess(state, { payload }) {
+    changeFilter(state, { payload }) {
       return {
         ...state,
-        isLoading: false,
-        items: [...state.items, payload],
+        filter: payload,
       };
     },
-    addError(state, { payload }) {
-      return { ...state, isLoading: false, error: payload };
-    },
-
-    removeContactRequest(state) {
-      state.isLoading = true;
-    },
-    removeContactSuccess(state, { payload }) {
-      return {
-        ...state,
-        isLoading: false,
-        items: state.items.filter(el => el.id !== payload),
-      };
-    },
-    removeContactError(state, { payload }) {
-      state.isLoading = false;
-      state.error = payload;
-    },
-    changeFilter: {
-      reducer(state, { payload }) {
-        return {
-          ...state,
-          filter: payload,
-        };
-      },
-      prepare(event) {
-        return {
-          payload: event.target.value,
-        };
-      },
-    },
+  },
+  extraReducers: buileder => {
+    buileder
+      .addCase(addContacts.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.contacts.push(payload);
+      })
+      .addCase(getContacts.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.contacts = payload;
+      })
+      .addCase(deleteContacts.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.contacts = state.contacts.filter(el => el.id !== payload);
+      })
+      .addMatcher(
+        action => action.type.endsWith('/pending'),
+        state => {
+          state.isLoading = true;
+        }
+      )
+      .addMatcher(
+        action =>
+          action.type.startsWith('contacts') &&
+          action.type.endsWith('/rejected'),
+        (state, { payload }) => {
+          state.isLoading = false;
+          state.error = payload;
+        }
+      );
   },
 });
 
-export const {
-  addSuccess,
-  addRequest,
-  addError,
-  changeFilter,
-  getContactError,
-  getContactRequest,
-  getContactSuccess,
-  removeContactError,
-  removeContactRequest,
-  removeContactSuccess,
-} = contactsSlice.actions;
-
-export default contactsSlice.reducer;
+export const { changeFilter } = contactsSlice.actions;
+export const contactsReducer = contactsSlice.reducer;
